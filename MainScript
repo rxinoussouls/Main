@@ -1,5 +1,6 @@
 if not game:IsLoaded() then
-    pcall(function() game.Loaded:Wait() end)
+    local start = os.clock()
+    repeat task.wait(0.1) until game:IsLoaded() or (os.clock() - start > 10)
 end
 
 if getgenv().__VYNX_LoaderRunning then
@@ -50,10 +51,12 @@ if not fn then
     return
 end
 
-print("[VYNX Loader] Executing delivered payload...")
-local runOk, runErr = pcall(fn)
-if not runOk then
-    warn("[VYNX Loader Error] Runtime failure: " .. tostring(runErr))
-else
-    print("[VYNX Loader] VYNX Hub successfully executed.")
-end
+print("[VYNX Loader] Spawning delivery payload thread...")
+task.spawn(function()
+    local runOk, runErr = pcall(fn)
+    if not runOk then
+        warn("[VYNX Loader Error] Runtime failure: " .. tostring(runErr))
+    else
+        print("[VYNX Loader] VYNX Hub successfully executed.")
+    end
+end)
