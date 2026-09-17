@@ -8,7 +8,7 @@ if getgenv().__VYNX_LoaderRunning then
     return
 end
 getgenv().__VYNX_LoaderRunning = true
-task.delay(6, function()
+task.delay(3, function()
     getgenv().__VYNX_LoaderRunning = nil
 end)
 
