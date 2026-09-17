@@ -1,0 +1,59 @@
+if not game:IsLoaded() then
+    pcall(function() game.Loaded:Wait() end)
+end
+
+if getgenv().__VYNX_LoaderRunning then
+    print("[VYNX Loader] Already running in background. Skipping duplicate trigger.")
+    return
+end
+getgenv().__VYNX_LoaderRunning = true
+task.delay(6, function()
+    getgenv().__VYNX_LoaderRunning = nil
+end)
+
+print("[VYNX Loader] Universal loader initialized. Starting...")
+
+if not getgenv().__VYNX_TeleportQueued then
+    getgenv().__VYNX_TeleportQueued = true
+    local queue_on_teleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+    if queue_on_teleport then
+        pcall(function()
+            queue_on_teleport([[
+                loadstring(game:HttpGet("https://api.jnkie.com/api/v1/loaders/public/5fc13d057d1fbab1d19a1b27c96359055d076196220e05e2f6efea95b75e609b/download"))()
+            ]])
+        end)
+        print("[VYNX Loader] Teleport auto-execute persistence armed.")
+    end
+end
+
+if game.PlaceId == 124216119978534 then
+    print("[VYNX Loader] Ride a Pet verified (PlaceId: 124216119978534).")
+else
+    print("[VYNX Loader] Notice: Current PlaceId is " .. tostring(game.PlaceId))
+end
+
+print("[VYNX Loader] Connecting to Jnkie delivery endpoint...")
+local fetchSuccess, deliveryScript = pcall(function()
+    return game:HttpGet("https://api.jnkie.com/api/v1/loaders/public/5fc13d057d1fbab1d19a1b27c96359055d076196220e05e2f6efea95b75e609b/download")
+end)
+
+if not fetchSuccess or not deliveryScript or #deliveryScript == 0 then
+    warn("[VYNX Loader Error] Failed to connect to Jnkie server: " .. tostring(deliveryScript))
+    return
+end
+
+print("[VYNX Loader] Delivery script fetched successfully (" .. tostring(#deliveryScript) .. " bytes). Compiling...")
+
+local fn, compileErr = loadstring(deliveryScript)
+if not fn then
+    warn("[VYNX Loader Error] Compilation failed: " .. tostring(compileErr))
+    return
+end
+
+print("[VYNX Loader] Executing delivered payload...")
+local runOk, runErr = pcall(fn)
+if not runOk then
+    warn("[VYNX Loader Error] Runtime failure: " .. tostring(runErr))
+else
+    print("[VYNX Loader] VYNX Hub successfully executed.")
+end
