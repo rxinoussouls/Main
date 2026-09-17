@@ -1,0 +1,19 @@
+name: Jnkie API Health Check
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Jnkie Delivery Endpoint
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.jnkie.com/api/v1/loaders/public/5fc13d057d1fbab1d19a1b27c96359055d076196220e05e2f6efea95b75e609b/download)
+          echo "HTTP Status: $STATUS"
+          if [ "$STATUS" -ne 200 ]; then
+            echo "Jnkie endpoint is down or returning an error!"
+            exit 1
+          fi
